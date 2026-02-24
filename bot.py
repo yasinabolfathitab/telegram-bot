@@ -9,8 +9,8 @@ api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
 OPENAI_KEY = os.getenv("OPENAI_KEY")
 
-source_channel = "https://t.me/mad_apes_gambles"
-target_channel = "https://t.me/MilyarderZZ"
+source_channel = "mad_apes_gambles"
+target_channel = "MilyarderZZ"
 
 footer = "\n\n👉 @MilyarderZZ"
 
@@ -132,3 +132,4 @@ async def main():
 
 
 asyncio.run(main())
+
