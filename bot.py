@@ -4,17 +4,10 @@ import re
 from telethon import TelegramClient, events
 from openai import OpenAI
 
-# ==============================
-# ENV VARIABLES
-# ==============================
-
+# ENV
 api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
 OPENAI_KEY = os.getenv("OPENAI_KEY")
-
-# ==============================
-# CHANNELS
-# ==============================
 
 source_channel = "https://t.me/mad_apes_gambles"
 target_channel = "https://t.me/MilyarderZZ"
@@ -23,20 +16,15 @@ footer = "\n\n👉 @MilyarderZZ"
 
 client_ai = OpenAI(api_key=OPENAI_KEY)
 
-# ==============================
-# REMOVE X LINKS
-# ==============================
 
+# حذف لینک های X
 def remove_x_links(text):
 
     pattern = r'https?:\/\/(x\.com|twitter\.com)\/\S+'
     return re.sub(pattern, '', text)
 
 
-# ==============================
-# CLEAN TEXT
-# ==============================
-
+# پاکسازی متن
 def clean_text(text):
 
     if not text:
@@ -44,24 +32,39 @@ def clean_text(text):
 
     text = remove_x_links(text)
 
-    text = text.replace("Disclaimer", "")
-    text = text.replace("Gamble Channel", "")
-    text = text.replace("Gambles Channel", "")
-    text = text.replace("Dip", "")
-    text = text.replace("Chat", "")
-    text = text.replace("____", "")
+    words_to_remove = [
+        "Disclaimer",
+        "Gambles Channel",
+        "Dip",
+        "Chat",
+        "____"
+    ]
+
+    for w in words_to_remove:
+        text = text.replace(w, "")
 
     return text.strip()
 
 
-# ==============================
-# AI TRANSLATION
-# ==============================
+# تشخیص انگلیسی بودن متن
+def is_english(text):
 
+    english_chars = re.findall(r'[a-zA-Z]', text)
+
+    if len(english_chars) > 10:
+        return True
+
+    return False
+
+
+# ترجمه با AI
 def translate_ai(text):
 
     if not text:
         return ""
+
+    if not is_english(text):
+        return text
 
     try:
 
@@ -80,16 +83,13 @@ def translate_ai(text):
     except Exception as e:
 
         print("Translation Error:", e)
+
         return text
 
 
-# ==============================
-# MAIN BOT
-# ==============================
-
 async def main():
 
-    client = TelegramClient("session", api_id, api_hash)
+    client = TelegramClient("newsession", api_id, api_hash)
 
     await client.start()
 
@@ -103,9 +103,6 @@ async def main():
             message = event.message
 
             text = clean_text(message.text)
-
-            if not text:
-                return
 
             persian_text = translate_ai(text)
 
@@ -128,7 +125,7 @@ async def main():
 
         except Exception as e:
 
-            print("Handler Error:", e)
+            print("Post Error:", e)
 
 
     await client.run_until_disconnected()
