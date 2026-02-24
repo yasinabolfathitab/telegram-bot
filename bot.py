@@ -20,8 +20,11 @@ def clean_text(text):
         return ""
 
     text = text.replace("Disclaimer", "")
-    text = text.replace("Gamble Channel", "")
-
+    text = text.replace("Gambles Channel", "")
+    text = text.replace("Dip", "")
+    text = text.replace("Chat", "")
+    text = text.replace("____", "")
+    
     return text.strip()
 
 
@@ -81,3 +84,4 @@ async def main():
 
 
 asyncio.run(main())
+
