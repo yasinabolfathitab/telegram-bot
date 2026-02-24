@@ -3,10 +3,9 @@ import os
 from telethon import TelegramClient, events
 from openai import OpenAI
 
-api_id = 31000802
-api_hash = "688b80a8860bca0d154d1cb4cceb721f"
-
-OPENAI_KEY = os.getenv("OPENAI_API_KEY")
+api_id = int(os.getenv("API_ID"))
+api_hash = os.getenv("API_HASH")
+OPENAI_KEY = os.getenv("OPENAI_KEY")
 
 source_channel = "https://t.me/mad_apes_gambles"
 target_channel = "https://t.me/MilyarderZZ"
@@ -27,9 +26,7 @@ def clean_text(text):
 
 
 def translate_ai(text):
-
     try:
-
         response = client_ai.responses.create(
             model="gpt-4.1-mini",
             input=f"""
