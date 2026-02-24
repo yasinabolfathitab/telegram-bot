@@ -4,10 +4,17 @@ import re
 from telethon import TelegramClient, events
 from openai import OpenAI
 
+# ==============================
 # ENV VARIABLES
+# ==============================
+
 api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
 OPENAI_KEY = os.getenv("OPENAI_KEY")
+
+# ==============================
+# CHANNELS
+# ==============================
 
 source_channel = "https://t.me/mad_apes_gambles"
 target_channel = "https://t.me/MilyarderZZ"
@@ -16,14 +23,20 @@ footer = "\n\n👉 @MilyarderZZ"
 
 client_ai = OpenAI(api_key=OPENAI_KEY)
 
+# ==============================
+# REMOVE X LINKS
+# ==============================
 
-# حذف لینک های X
 def remove_x_links(text):
+
     pattern = r'https?:\/\/(x\.com|twitter\.com)\/\S+'
     return re.sub(pattern, '', text)
 
 
-# پاکسازی متن
+# ==============================
+# CLEAN TEXT
+# ==============================
+
 def clean_text(text):
 
     if not text:
@@ -32,6 +45,7 @@ def clean_text(text):
     text = remove_x_links(text)
 
     text = text.replace("Disclaimer", "")
+    text = text.replace("Gamble Channel", "")
     text = text.replace("Gambles Channel", "")
     text = text.replace("Dip", "")
     text = text.replace("Chat", "")
@@ -40,7 +54,10 @@ def clean_text(text):
     return text.strip()
 
 
-# ترجمه با AI
+# ==============================
+# AI TRANSLATION
+# ==============================
+
 def translate_ai(text):
 
     if not text:
@@ -50,16 +67,25 @@ def translate_ai(text):
 
         response = client_ai.responses.create(
             model="gpt-4.1-mini",
-            input=f"Translate this crypto message to fluent Persian. Only return the translation:\n\n{text}"
+            input=f"""
+متن زیر را به فارسی روان ترجمه کن.
+هیچ توضیح اضافه نده.
+
+{text}
+"""
         )
 
-        return response.output_text.strip()
+        return response.output_text
 
     except Exception as e:
 
         print("Translation Error:", e)
         return text
 
+
+# ==============================
+# MAIN BOT
+# ==============================
 
 async def main():
 
@@ -72,31 +98,38 @@ async def main():
     @client.on(events.NewMessage(chats=source_channel))
     async def handler(event):
 
-        message = event.message
+        try:
 
-        text = clean_text(message.text)
+            message = event.message
 
-        persian_text = ""
+            text = clean_text(message.text)
 
-        if text:
+            if not text:
+                return
+
             persian_text = translate_ai(text)
 
-        final_text = persian_text + footer if persian_text else footer
+            final_text = persian_text + footer
 
-        if message.media:
+            if message.media:
 
-            await client.send_file(
-                target_channel,
-                message.media,
-                caption=final_text
-            )
+                await client.send_file(
+                    target_channel,
+                    message.media,
+                    caption=final_text
+                )
 
-        else:
+            else:
 
-            await client.send_message(
-                target_channel,
-                final_text
-            )
+                await client.send_message(
+                    target_channel,
+                    final_text
+                )
+
+        except Exception as e:
+
+            print("Handler Error:", e)
+
 
     await client.run_until_disconnected()
 
