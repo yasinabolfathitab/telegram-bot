@@ -9,22 +9,21 @@ api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
 OPENAI_KEY = os.getenv("OPENAI_KEY")
 
-source_channel = "t.me/mad_apes_gambles"
-target_channel = "t.me/MilyarderZZ"
+# کانال ها (فقط یوزرنیم)
+source_channel = "mad_apes_gambles"
+target_channel = "MilyarderZZ"
 
 footer = "\n\n👉 @MilyarderZZ"
 
 client_ai = OpenAI(api_key=OPENAI_KEY)
 
 
-# حذف لینک های X
 def remove_x_links(text):
 
     pattern = r'https?:\/\/(x\.com|twitter\.com)\/\S+'
     return re.sub(pattern, '', text)
 
 
-# پاکسازی متن
 def clean_text(text):
 
     if not text:
@@ -32,16 +31,20 @@ def clean_text(text):
 
     text = remove_x_links(text)
 
-    text = text.replace("Disclaimer", "")
-    text = text.replace("Gambles Channel", "")
-    text = text.replace("Dip", "")
-    text = text.replace("Chat", "")
-    text = text.replace("____", "")
+    remove_words = [
+        "Disclaimer",
+        "Gambles Channel",
+        "Dip",
+        "Chat",
+        "____"
+    ]
+
+    for w in remove_words:
+        text = text.replace(w, "")
 
     return text.strip()
 
 
-# ترجمه با AI
 def translate_ai(text):
 
     if not text:
@@ -50,20 +53,21 @@ def translate_ai(text):
     try:
 
         response = client_ai.responses.create(
-            model="gpt-4.1-mini",
+            model="gpt-4o-mini",
             input=f"""
-متن زیر را به فارسی روان ترجمه کن.
-هیچ توضیح اضافه نده.
+Translate the following text to fluent Persian.
+Only output the translated Persian text.
 
 {text}
 """
         )
 
-        return response.output[0].content[0].text
+        return response.output_text
 
     except Exception as e:
 
-        print("Translation Error:", e)
+        print("Translation error:", e)
+
         return text
 
 
@@ -73,36 +77,44 @@ async def main():
 
     await client.start()
 
-    print("Bot is running...")
+    print("BOT RUNNING...")
 
     @client.on(events.NewMessage(chats=source_channel))
     async def handler(event):
 
-        message = event.message
+        try:
 
-        text = clean_text(message.text)
+            message = event.message
 
-        if not text:
-            return
+            print("NEW MESSAGE DETECTED")
 
-        persian_text = translate_ai(text)
+            text = clean_text(message.text)
 
-        final_text = persian_text + footer
+            translated = translate_ai(text)
 
-        if message.media:
+            final_text = translated + footer
 
-            await client.send_file(
-                target_channel,
-                message.media,
-                caption=final_text
-            )
+            if message.media:
 
-        else:
+                await client.send_file(
+                    target_channel,
+                    message.media,
+                    caption=final_text
+                )
 
-            await client.send_message(
-                target_channel,
-                final_text
-            )
+            else:
+
+                await client.send_message(
+                    target_channel,
+                    final_text
+                )
+
+            print("POST SENT")
+
+        except Exception as e:
+
+            print("POST ERROR:", e)
+
 
     await client.run_until_disconnected()
 
