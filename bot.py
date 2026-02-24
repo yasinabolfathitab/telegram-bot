@@ -2,20 +2,20 @@ import asyncio
 import os
 import re
 from telethon import TelegramClient, events
+from telethon.sessions import StringSession
 from openai import OpenAI
 
-# ENV VARIABLES
 api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
-OPENAI_KEY = os.getenv("OPENAI_KEY")
+string_session = os.getenv("STRING_SESSION")
+openai_key = os.getenv("OPENAI_KEY")
 
-# کانال ها (فقط یوزرنیم)
 source_channel = "mad_apes_gambles"
 target_channel = "MilyarderZZ"
 
 footer = "\n\n👉 @MilyarderZZ"
 
-client_ai = OpenAI(api_key=OPENAI_KEY)
+ai = OpenAI(api_key=openai_key)
 
 
 def remove_x_links(text):
@@ -52,11 +52,11 @@ def translate_ai(text):
 
     try:
 
-        response = client_ai.responses.create(
+        response = ai.responses.create(
             model="gpt-4o-mini",
             input=f"""
 Translate the following text to fluent Persian.
-Only output the translated Persian text.
+Return only the Persian translation.
 
 {text}
 """
@@ -73,11 +73,15 @@ Only output the translated Persian text.
 
 async def main():
 
-    client = TelegramClient("session", api_id, api_hash)
+    client = TelegramClient(
+        StringSession(string_session),
+        api_id,
+        api_hash
+    )
 
     await client.start()
 
-    print("BOT RUNNING...")
+    print("BOT RUNNING")
 
     @client.on(events.NewMessage(chats=source_channel))
     async def handler(event):
@@ -86,7 +90,7 @@ async def main():
 
             message = event.message
 
-            print("NEW MESSAGE DETECTED")
+            print("NEW POST")
 
             text = clean_text(message.text)
 
