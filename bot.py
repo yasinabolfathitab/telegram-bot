@@ -19,7 +19,6 @@ client_ai = OpenAI(api_key=OPENAI_KEY)
 
 # حذف لینک های X
 def remove_x_links(text):
-
     pattern = r'https?:\/\/(x\.com|twitter\.com)\/\S+'
     return re.sub(pattern, '', text)
 
@@ -51,12 +50,10 @@ def translate_ai(text):
 
         response = client_ai.responses.create(
             model="gpt-4.1-mini",
-            input=f"Translate the following text to fluent Persian. Only output the translation:\n\n{text}"
+            input=f"Translate this crypto message to fluent Persian. Only return the translation:\n\n{text}"
         )
 
-        translated = response.output_text
-
-        return translated.strip()
+        return response.output_text.strip()
 
     except Exception as e:
 
@@ -79,12 +76,12 @@ async def main():
 
         text = clean_text(message.text)
 
-        if not text:
-            return
+        persian_text = ""
 
-        persian_text = translate_ai(text)
+        if text:
+            persian_text = translate_ai(text)
 
-        final_text = persian_text + footer
+        final_text = persian_text + footer if persian_text else footer
 
         if message.media:
 
