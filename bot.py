@@ -51,15 +51,12 @@ def translate_ai(text):
 
         response = client_ai.responses.create(
             model="gpt-4.1-mini",
-            input=f"""
-متن زیر را به فارسی روان ترجمه کن.
-هیچ توضیح اضافه نده.
-
-{text}
-"""
+            input=f"Translate the following text to fluent Persian. Only output the translation:\n\n{text}"
         )
 
-        return response.output[0].content[0].text
+        translated = response.output_text
+
+        return translated.strip()
 
     except Exception as e:
 
