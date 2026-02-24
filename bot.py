@@ -4,13 +4,13 @@ import re
 from telethon import TelegramClient, events
 from openai import OpenAI
 
-# ENV
+# ENV VARIABLES
 api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
 OPENAI_KEY = os.getenv("OPENAI_KEY")
 
-source_channel = "mad_apes_gambles"
-target_channel = "MilyarderZZ"
+source_channel = "t.me/mad_apes_gambles"
+target_channel = "t.me/MilyarderZZ"
 
 footer = "\n\n👉 @MilyarderZZ"
 
@@ -32,29 +32,13 @@ def clean_text(text):
 
     text = remove_x_links(text)
 
-    words_to_remove = [
-        "Disclaimer",
-        "Gambles Channel",
-        "Dip",
-        "Chat",
-        "____"
-    ]
-
-    for w in words_to_remove:
-        text = text.replace(w, "")
+    text = text.replace("Disclaimer", "")
+    text = text.replace("Gambles Channel", "")
+    text = text.replace("Dip", "")
+    text = text.replace("Chat", "")
+    text = text.replace("____", "")
 
     return text.strip()
-
-
-# تشخیص انگلیسی بودن متن
-def is_english(text):
-
-    english_chars = re.findall(r'[a-zA-Z]', text)
-
-    if len(english_chars) > 10:
-        return True
-
-    return False
 
 
 # ترجمه با AI
@@ -62,9 +46,6 @@ def translate_ai(text):
 
     if not text:
         return ""
-
-    if not is_english(text):
-        return text
 
     try:
 
@@ -78,18 +59,17 @@ def translate_ai(text):
 """
         )
 
-        return response.output_text
+        return response.output[0].content[0].text
 
     except Exception as e:
 
         print("Translation Error:", e)
-
         return text
 
 
 async def main():
 
-    client = TelegramClient("newsession", api_id, api_hash)
+    client = TelegramClient("session", api_id, api_hash)
 
     await client.start()
 
@@ -98,38 +78,33 @@ async def main():
     @client.on(events.NewMessage(chats=source_channel))
     async def handler(event):
 
-        try:
+        message = event.message
 
-            message = event.message
+        text = clean_text(message.text)
 
-            text = clean_text(message.text)
+        if not text:
+            return
 
-            persian_text = translate_ai(text)
+        persian_text = translate_ai(text)
 
-            final_text = persian_text + footer
+        final_text = persian_text + footer
 
-            if message.media:
+        if message.media:
 
-                await client.send_file(
-                    target_channel,
-                    message.media,
-                    caption=final_text
-                )
+            await client.send_file(
+                target_channel,
+                message.media,
+                caption=final_text
+            )
 
-            else:
+        else:
 
-                await client.send_message(
-                    target_channel,
-                    final_text
-                )
-
-        except Exception as e:
-
-            print("Post Error:", e)
-
+            await client.send_message(
+                target_channel,
+                final_text
+            )
 
     await client.run_until_disconnected()
 
 
 asyncio.run(main())
-
