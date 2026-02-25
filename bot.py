@@ -32,11 +32,11 @@ def clean_text(text):
     text = remove_x_links(text)
 
     remove_words = [
-        "Disclaimer",
-        "Gambles Channel",
-        "Dip",
-        "Chat",
-        "____"
+        "LBANK",
+        "ثبت نام و لینک ورود",
+        "لینک ورود و ثبت نام",
+        "Bitfa Futures",
+        "@Bitfa_io"
     ]
 
     for w in remove_words:
@@ -124,4 +124,5 @@ async def main():
 
 
 asyncio.run(main())
+
 
