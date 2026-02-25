@@ -10,7 +10,11 @@ api_hash = os.getenv("API_HASH")
 string_session = os.getenv("STRING_SESSION")
 openai_key = os.getenv("OPENAI_KEY")
 
-source_channel = "bitfa_io"
+source_channels = [
+    "Bitfa_io",
+    "Cointelegraph",
+    "NeoVestNews"
+]
 target_channel = "MilyarderZZ"
 
 footer = "\n\n👉 @MilyarderZZ"
@@ -36,7 +40,9 @@ def clean_text(text):
         "ثبت نام و لینک ورود",
         "لینک ورود و ثبت نام",
         "Bitfa Futures",
-        "@Bitfa_io"
+        "@Bitfa_io",
+        "YouTube",
+        "@NeoVestNews"
     ]
 
     for w in remove_words:
@@ -124,5 +130,6 @@ async def main():
 
 
 asyncio.run(main())
+
 
 
