@@ -61,6 +61,9 @@ def clean_text(text):
         "Bitfa Futures",
         "@Bitfa_io",
         "YouTube",
+        "News",
+        "Markets",
+        "|",
         "@NeoVestNews"
     ]
 
@@ -158,3 +161,4 @@ async def main():
 
 
 asyncio.run(main())
+
