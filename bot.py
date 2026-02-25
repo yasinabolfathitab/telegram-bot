@@ -27,6 +27,7 @@ client_ai = OpenAI(api_key=OPENAI_KEY)
 source_channels = [
     "Bitfa_io",
     "crypto_gorg",
+    "mehdisafari_com",
     "irmemecoin",
     "NeoVestNews"
 ]
@@ -60,6 +61,7 @@ def clean_text(text):
         "ثبت نام و لینک ورود",
         "لینک ورود و ثبت نام",
         "Bitfa Futures",
+        "@mehdisafari_com",
         "@Bitfa_io",
         "YouTube",
         "News",
@@ -162,6 +164,7 @@ async def main():
 
 
 asyncio.run(main())
+
 
 
 
