@@ -10,7 +10,7 @@ api_hash = os.getenv("API_HASH")
 string_session = os.getenv("STRING_SESSION")
 openai_key = os.getenv("OPENAI_KEY")
 
-source_channel = "mad_apes_gambles"
+source_channel = "bitfa_io"
 target_channel = "MilyarderZZ"
 
 footer = "\n\n👉 @MilyarderZZ"
@@ -124,3 +124,4 @@ async def main():
 
 
 asyncio.run(main())
+
