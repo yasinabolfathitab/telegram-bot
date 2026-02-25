@@ -2,36 +2,51 @@ import asyncio
 import os
 import re
 from telethon import TelegramClient, events
+from telethon.sessions import StringSession
 from openai import OpenAI
 
+# =========================
 # ENV VARIABLES
+# =========================
+
 api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
+string_session = os.getenv("STRING_SESSION")
 OPENAI_KEY = os.getenv("OPENAI_KEY")
 
-# چند کانال مبدا
+# =========================
+# OPENAI
+# =========================
+
+client_ai = OpenAI(api_key=OPENAI_KEY)
+
+# =========================
+# CHANNELS
+# =========================
+
 source_channels = [
     "Bitfa_io",
     "Cointelegraph",
     "NeoVestNews"
 ]
 
-# کانال مقصد
 target_channel = "MilyarderZZ"
 
 footer = "\n\n👉 @MilyarderZZ"
 
-client_ai = OpenAI(api_key=OPENAI_KEY)
+# =========================
+# REMOVE X LINKS
+# =========================
 
-
-# حذف لینک های X
 def remove_x_links(text):
 
     pattern = r'https?:\/\/(x\.com|twitter\.com)\/\S+'
     return re.sub(pattern, '', text)
 
+# =========================
+# CLEAN TEXT
+# =========================
 
-# پاکسازی متن
 def clean_text(text):
 
     if not text:
@@ -54,8 +69,10 @@ def clean_text(text):
 
     return text.strip()
 
+# =========================
+# AI TRANSLATION
+# =========================
 
-# ترجمه با AI
 def translate_ai(text):
 
     if not text:
@@ -67,7 +84,7 @@ def translate_ai(text):
             model="gpt-4o-mini",
             input=f"""
 Translate the following text to fluent Persian.
-Only output the translated Persian text.
+Only output Persian translation.
 
 {text}
 """
@@ -80,10 +97,17 @@ Only output the translated Persian text.
         print("Translation error:", e)
         return text
 
+# =========================
+# MAIN
+# =========================
 
 async def main():
 
-    client = TelegramClient("session", api_id, api_hash)
+    client = TelegramClient(
+        StringSession(string_session),
+        api_id,
+        api_hash
+    )
 
     await client.start()
 
@@ -100,11 +124,13 @@ async def main():
 
             text = clean_text(message.text)
 
+            if not text and not message.media:
+                return
+
             translated = translate_ai(text)
 
             final_text = translated + footer
 
-            # جلوگیری از اسپم
             await asyncio.sleep(2)
 
             if message.media:
@@ -112,7 +138,7 @@ async def main():
                 await client.send_file(
                     target_channel,
                     message.media,
-                    caption=final_text
+                    caption=final_text if final_text.strip() else footer
                 )
 
             else:
@@ -127,7 +153,6 @@ async def main():
         except Exception as e:
 
             print("POST ERROR:", e)
-
 
     await client.run_until_disconnected()
 
