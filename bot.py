@@ -26,7 +26,7 @@ client_ai = OpenAI(api_key=OPENAI_KEY)
 
 source_channels = [
     "Bitfa_io",
-    "Cointelegraph",
+    "crypto_gorg",
     "NeoVestNews"
 ]
 
@@ -161,4 +161,5 @@ async def main():
 
 
 asyncio.run(main())
+
 
