@@ -2,32 +2,36 @@ import asyncio
 import os
 import re
 from telethon import TelegramClient, events
-from telethon.sessions import StringSession
 from openai import OpenAI
 
+# ENV VARIABLES
 api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
-string_session = os.getenv("STRING_SESSION")
-openai_key = os.getenv("OPENAI_KEY")
+OPENAI_KEY = os.getenv("OPENAI_KEY")
 
+# چند کانال مبدا
 source_channels = [
     "Bitfa_io",
     "Cointelegraph",
     "NeoVestNews"
 ]
+
+# کانال مقصد
 target_channel = "MilyarderZZ"
 
 footer = "\n\n👉 @MilyarderZZ"
 
-ai = OpenAI(api_key=openai_key)
+client_ai = OpenAI(api_key=OPENAI_KEY)
 
 
+# حذف لینک های X
 def remove_x_links(text):
 
     pattern = r'https?:\/\/(x\.com|twitter\.com)\/\S+'
     return re.sub(pattern, '', text)
 
 
+# پاکسازی متن
 def clean_text(text):
 
     if not text:
@@ -51,6 +55,7 @@ def clean_text(text):
     return text.strip()
 
 
+# ترجمه با AI
 def translate_ai(text):
 
     if not text:
@@ -58,11 +63,11 @@ def translate_ai(text):
 
     try:
 
-        response = ai.responses.create(
+        response = client_ai.responses.create(
             model="gpt-4o-mini",
             input=f"""
 Translate the following text to fluent Persian.
-Return only the Persian translation.
+Only output the translated Persian text.
 
 {text}
 """
@@ -73,36 +78,34 @@ Return only the Persian translation.
     except Exception as e:
 
         print("Translation error:", e)
-
         return text
 
 
 async def main():
 
-    client = TelegramClient(
-        StringSession(string_session),
-        api_id,
-        api_hash
-    )
+    client = TelegramClient("session", api_id, api_hash)
 
     await client.start()
 
-    print("BOT RUNNING")
+    print("BOT RUNNING...")
 
-    @client.on(events.NewMessage(chats=source_channel))
+    @client.on(events.NewMessage(chats=source_channels))
     async def handler(event):
 
         try:
 
             message = event.message
 
-            print("NEW POST")
+            print("NEW MESSAGE DETECTED")
 
             text = clean_text(message.text)
 
             translated = translate_ai(text)
 
             final_text = translated + footer
+
+            # جلوگیری از اسپم
+            await asyncio.sleep(2)
 
             if message.media:
 
@@ -130,6 +133,3 @@ async def main():
 
 
 asyncio.run(main())
-
-
-
